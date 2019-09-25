@@ -23,6 +23,7 @@ class Client extends HttpClient {
 		$client   = new self( [ 'base_uri' => $base_uri ] );
 
 		return $client;
+
 	}
 
 	public function testConnection() {
@@ -45,10 +46,24 @@ class Client extends HttpClient {
 	}
 
 	public function endPointStatus() {
-		return $this->endPoint( '?action=' . strtolower( WP_CLUSTER_CACHE ) . '_status' );
+		return $this->endPoint( [ 'action' => strtolower( WP_CLUSTER_CACHE ) . '_status' ] );
 	}
 
 	public function endPoint( $extra ) {
-		return '/wp-admin/admin-ajax.php' . $extra;
+		$query = build_query( $extra );
+
+		return '/wp-admin/admin-ajax.php?' . $query;
+	}
+
+	public function requestDeleteCache( array $params = [] ) {
+		$end_point = $this->endPointDelete( $params );
+
+		return $this->request( 'GET', $end_point );
+	}
+
+	public function endPointDelete( array $params = [] ) {
+		$params['action'] = strtolower( WP_CLUSTER_CACHE ) . '_delete';
+
+		return $this->endPoint( $params );
 	}
 }

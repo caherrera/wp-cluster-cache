@@ -2,6 +2,9 @@
 
 namespace WpClusterCache;
 
+use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Exception\ConnectException;
+
 class Actions {
 	private static $instance;
 
@@ -52,24 +55,50 @@ class Actions {
 		wp_send_json_success();
 	}
 
-	public function clean_cluster_cache() {
-		$hosts = (array) Settings::getHosts();
-		foreach ( $hosts as $host ) {
-
+	public function broadcast() {
+		if ( empty( $params = array_filter( func_get_args() ) ) ) {
+			$params = $_GET;
 		}
+		$hosts   = (array) Settings::hosts();
+		$results = [];
+		foreach ( $hosts as $host ) {
+			$client = Client::client_by_host( $host );
+			try {
+				$response         = $client->requestDeleteCache( $params );
+				$results[ $host ] = [ 'status' => $response->getStatusCode(), 'body' => $response->getBody()->getContents() ];
 
+			} catch ( ClientException $e ) {
+				$results[ $host ] = [ 'status' => $e->getResponse()->getStatusCode(), 'body' => $e->getResponse()->getBody()->getContents() ];
+			} catch ( ConnectException $e ) {
+				$results[ $host ] = [ 'status' => 500, 'body' => $e->getMessage() ];
+			}
+		}
+		wp_send_json_success( $results );
 	}
 
-	public function clean_remote_cache() {
-		if ( $id = get_query_var( 'p' ) && $type = get_query_var( 'post_type' ) ) {
-			if ( $post = get_post( $id ) ) {
-				clean_post_cache( $id );
-			} else {
-				wp_die( "ID does not exists" );
-			}
+	public function clean() {
+		$params = $_GET;
+
+		if ( isset( $params['id'] ) && is_numeric( $params['id'] ) ) {
+			wpsc_delete_post_cache( $params['id'] );
+
+		} elseif ( ! empty( $params['expired'] ) ) {
+			global $file_prefix;
+			wp_cache_clean_expired( $file_prefix );
+
+		} elseif ( isset( $params['url'] ) ) {
+			global $cache_path;
+
+			$directory = $cache_path . 'supercache/' . $params['url'];
+			wpsc_delete_files( $directory );
+			prune_super_cache( $directory . '/page', true );
+
 		} else {
-			wp_die( "ID is not present" );
+			global $file_prefix;
+			wp_cache_clean_cache( $file_prefix, ! empty( $params['all'] ) );
 		}
+
+		return wp_send_json_success( array( 'Cache Cleared' => true ) );
 	}
 
 

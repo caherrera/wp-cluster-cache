@@ -9,15 +9,6 @@ class Settings {
 	const CONFIG_USER_ID = 'user_id';
 	const CONFIG_PASSWORD = 'password';
 
-
-	public static function getHosts() {
-		return get_option( static::getConfigNameOfHosts() );
-	}
-
-	public static function getConfigNameOfHosts() {
-		return WP_CLUSTER_CACHE . '_' . Settings::CONFIG_HOSTS;
-	}
-
 	public static function getPort() {
 		return get_option( static::getConfigNameOfPort() );
 	}
@@ -42,13 +33,24 @@ class Settings {
 		return WP_CLUSTER_CACHE . '_' . Settings::CONFIG_USER_ID;
 	}
 
-
 	public static function getPassword() {
 		return get_option( static::getConfigNameOfPassword() );
 	}
 
 	public static function getConfigNameOfPassword() {
 		return WP_CLUSTER_CACHE . '_' . Settings::CONFIG_PASSWORD;
+	}
+
+	public static function hosts() {
+		return preg_split( "/[\s,]+/", self::getHosts() );
+	}
+
+	public static function getHosts() {
+		return get_option( static::getConfigNameOfHosts() );
+	}
+
+	public static function getConfigNameOfHosts() {
+		return WP_CLUSTER_CACHE . '_' . Settings::CONFIG_HOSTS;
 	}
 
 	public function setPassword( $item ) {

@@ -21,7 +21,11 @@ class AdminTestConn {
 			$rows[] = $page->row( [ $page->td( $icon, [ 'style' => 'width: 2.2em;' ] ), $page->td( $v['title'] ), $page->td( $v['result'] ) ] );
 		}
 		$page->add( $page->table( [
-			$page->thead( $page->row( [ $page->td( '<span class="dashicons dashicons-yes" style="color:green"></span>', [ 'style' => 'width: 2.2em;' ] ), $page->th( 'Check' ), $page->th( 'Result' ) ] ) ),
+			$page->thead( $page->row( [
+				$page->td( '<span class="dashicons dashicons-yes" style="color:green"></span>', [ 'style' => 'width: 2.2em;' ] ),
+				$page->th( 'Check' ),
+				$page->th( 'Result' )
+			] ) ),
 			$page->tbody( $rows )
 		], [ 'class' => 'wp-list-table widefat fixed striped' ] ) );
 		echo $page;
@@ -37,7 +41,7 @@ class AdminTestConn {
 		$results[] = [ 'title' => 'Has WP User id ', 'result' => ( $ok = ! empty( Settings::getUserid() ) ) ? 'OK' : 'Missing', 'ok' => $ok ];
 		$results[] = [ 'title' => 'Has Password   ', 'result' => ( $ok = ! empty( Settings::getPassword() ) ) ? 'OK' : 'Missing', 'ok' => $ok ];
 
-		foreach ( preg_split( "/[\s,]+/", Settings::getHosts() ) as $h => $host ) {
+		foreach ( Settings::hosts() as $h => $host ) {
 			$assert = '';
 			try {
 				$assert = "Connection to Host ($h) : $host";
