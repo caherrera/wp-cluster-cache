@@ -1,7 +1,7 @@
 {
   "name": "caherrera/wp-cluster-cache",
   "type": "library",
-  "description": "A Cluster complement for wordpress",
+  "description": "Wordpress Plugin that cleans cache files to other servers from a cluster",
   "keywords": [
     "performance"," caching"," wp-cache"," wp-super-cache"," cache"
   ],
@@ -20,7 +20,8 @@
     }
   ],
   "require": {
-    "php": ">=7.0"
+    "php": ">=7.0",
+    "guzzlehttp/guzzle": "^6.3"
   },
   "require-dev": {
     "phpunit/phpunit": "~6.0",

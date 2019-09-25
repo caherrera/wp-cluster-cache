@@ -15,20 +15,12 @@ class AdminPage extends HtmlForm {
 
 
 			$content[] = $this->page( [
-				$this->title( 'WP-ADLDAP2' ),
-				$this->p( 'Sync your Active Directory With Wordpress' ),
+				$this->title( 'Cluster Cache' ),
+				$this->p( 'Wordpress Plugin that cleans cache files to other servers from a cluster.' ),
 				$this->tabs()
 			] );
 		}
 		parent::__construct( $attr, $content );
-
-	}
-
-	public function enqueue_jquery_ui() {
-		parent::enqueue_jquery_ui();
-		wp_enqueue_script('jquery-ui-tabs');
-		wp_add_inline_script(WpClusterCache,"$( function() { $( \"#tabs\" ).tabs(); } );");
-
 
 	}
 
@@ -38,10 +30,9 @@ class AdminPage extends HtmlForm {
 
 	public function tabs() {
 		$tabs = [
-			new HtmlTab( 'LDAP Account', ( new AdminForm() )->printLdapSettings() ),
-			new HtmlTab( 'Filters', ( new AdminForm() )->printLdapFilters() ),
-			new HtmlTab( 'Fields to Sync', ( new AdminForm() )->printFieldsToSync() ),
-			new HtmlTab( 'Fields to Match', ( new AdminForm() )->printFieldsToMatch() ),
+			new HtmlTab( [ 'id' => 'general', 'title' => 'Hosts', 'label' => 'Hosts' ], ( new AdminForm() )->printSettings() ),
+//			new HtmlTab( [ 'id' => 'test', 'title' => 'TEST', 'label' => 'TEST'], ( new AdminForm() )->title( 'TEST' ) ),
+
 		];
 
 		$ul   = array_map( function ( HtmlTab $tab ) {

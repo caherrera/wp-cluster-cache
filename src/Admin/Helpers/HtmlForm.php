@@ -18,14 +18,6 @@ class HtmlForm extends HtmlTag {
 		} elseif ( is_string( $attr ) ) {
 			$this->_html = [ $attr ];
 		}
-		add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_jquery_ui' ] );
-
-
-	}
-
-
-	public function enqueue_jquery_ui() {
-		wp_enqueue_script( 'jquery-ui-core' );
 
 	}
 
@@ -41,9 +33,16 @@ class HtmlForm extends HtmlTag {
 		return $this->wrap( $row, 'tr' );
 	}
 
-	public function inputSetting( $name, $title, $value, $default ) {
+	public function inputSetting( $name, $title, $value, $default, $type = 'text' ) {
 		$html = sprintf( "<tr class=\"form-field\"><th scope=\"row\"><label>%s</label></th>", $title );
-		$html .= sprintf( "<td><input name=\"%s\" value=\"%s\" placeholder=\"%s\"/></td></tr>", $name, $value ?: $default, $default );
+		$html .= sprintf( "<td><input name=\"%s\" type=\"%s\" value=\"%s\" placeholder=\"%s\"/></td></tr>", $name, $type, $value ?: $default, $default );
+
+		return $html;
+	}
+
+	public function textareaSetting( $name, $title, $value, $default ) {
+		$html = sprintf( "<tr class=\"form-field\"><th scope=\"row\"><label>%s</label></th>", $title );
+		$html .= sprintf( "<td><textarea name=\"%s\" placeholder=\"%s\">%s</textarea></td></tr>", $name, $default, $value );
 
 		return $html;
 	}
@@ -84,8 +83,8 @@ class HtmlForm extends HtmlTag {
 		return $this->wrap( $html, 'tr', [ 'class' => 'form-field' ] );
 	}
 
-	public function table( $rows = [] ) {
-		return $this->wrap( $rows, 'table', [ 'class' => 'form-table' ] );
+	public function table( $rows = [], $attr = [] ) {
+		return $this->wrap( $rows, 'table', array_merge( [ 'class' => 'form-table' ], (array) $attr ) );
 	}
 
 	public function submit( $title ) {

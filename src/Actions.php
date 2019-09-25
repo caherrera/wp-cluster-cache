@@ -3,6 +3,7 @@
 namespace WpClusterCache;
 
 class Actions {
+	private static $instance;
 
 	private function __construct() {
 		self::init();
@@ -12,10 +13,28 @@ class Actions {
 
 	public function init() {
 
-		add_action( 'clean_post_cache', [ $this, 'clean_cluster_cache' ] );
-		add_action( 'clean_remote_cache', [ $this, 'clean_remote_cache' ] );
+		$this->addAjaxAction( 'status' );
+		$this->addAjaxAction( 'clean' );
+		$this->addAjaxAction( 'broadcast' );
+	}
 
+	public function addAjaxAction( $action, $method = null ) {
+		switch ( true ) {
+			case is_null( $method ):
+				$callable = [ $this, $action ];
+				break;
+			case is_string( $method ):
+				$callable = [ $this, $method ];
+				break;
+			case is_callable( $method ):
+				$callable = $method;
+				break;
+			default:
+				return;
+		}
 
+		add_action( 'wp_ajax_' . strtolower( WP_CLUSTER_CACHE ) . '_' . $action, $callable );
+		add_action( 'wp_ajax_nopriv_' . strtolower( WP_CLUSTER_CACHE ) . '_' . $action, $callable );
 	}
 
 	static public function factory() {
@@ -29,16 +48,28 @@ class Actions {
 		return self::$instance;
 	}
 
+	public function status() {
+		wp_send_json_success();
+	}
+
 	public function clean_cluster_cache() {
 		$hosts = (array) Settings::getHosts();
 		foreach ( $hosts as $host ) {
-			
+
 		}
 
 	}
 
-	public function clean_remote_cache( $post ) {
-		clean_post_cache( $post );
+	public function clean_remote_cache() {
+		if ( $id = get_query_var( 'p' ) && $type = get_query_var( 'post_type' ) ) {
+			if ( $post = get_post( $id ) ) {
+				clean_post_cache( $id );
+			} else {
+				wp_die( "ID does not exists" );
+			}
+		} else {
+			wp_die( "ID is not present" );
+		}
 	}
 
 

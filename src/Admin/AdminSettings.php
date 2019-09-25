@@ -3,7 +3,6 @@
 namespace WpClusterCache\Admin;
 
 use WpClusterCache\Admin\Views\AdminPage;
-use WpClusterCache\Cache;
 use WpClusterCache\Traits\TraitHasFactory;
 
 class AdminSettings {
@@ -12,7 +11,6 @@ class AdminSettings {
 	public function settingsPage() {
 		if ( $_POST ) {
 			$this->saveSettings();
-			Cache::flush();
 		}
 		echo new AdminPage();
 
@@ -20,8 +18,8 @@ class AdminSettings {
 
 	public function saveSettings() {
 		foreach ( $_POST as $key => $item ) {
-			if ( preg_match( "/" . WpClusterCache . "/", $key ) ) {
-				update_option( $key, $item );
+			if ( preg_match( "/" . WP_CLUSTER_CACHE . "/", $key ) ) {
+				update_option( $key, $item, false );
 			}
 		}
 	}

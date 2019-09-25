@@ -2,25 +2,28 @@
 
 namespace WpClusterCache\Admin;
 
-use Exception;
-use WpClusterCache\Admin\Views\AdminPageTestConn;
+use WpClusterCache\Admin\Helpers\HtmlForm;
+use WpClusterCache\Client;
 use WpClusterCache\Settings;
 use WpClusterCache\Traits\TraitHasFactory;
-use WpClusterCache\WpClusterCache;
 
 class AdminTestConn {
 	use TraitHasFactory;
 
 	public function settingsPage() {
 
-		$page    = new AdminPageTestConn();
+		$page    = new HtmlForm();
 		$results = $this->testResults();
 		$rows    = [];
+
 		foreach ( $results as $v ) {
 			$icon   = $v['ok'] == true ? '<span class="dashicons dashicons-yes" style="color:green"></span>' : '<span class="dashicons dashicons-dismiss" style="color: red"></span>';
-			$rows[] = $page->row( [ $page->th( $v['title'], [ 'style' => 'width:65%;padding: 10px 10px 0 0' ] ), $page->td( $icon . $v['result'],[ 'style' => 'padding: 10px 10px 0 0' ] ) ] );
+			$rows[] = $page->row( [ $page->td( $icon, [ 'style' => 'width: 2.2em;' ] ), $page->td( $v['title'] ), $page->td( $v['result'] ) ] );
 		}
-		$page->add( $page->table( $rows ) );
+		$page->add( $page->table( [
+			$page->thead( $page->row( [ $page->td( '<span class="dashicons dashicons-yes" style="color:green"></span>', [ 'style' => 'width: 2.2em;' ] ), $page->th( 'Check' ), $page->th( 'Result' ) ] ) ),
+			$page->tbody( $rows )
+		], [ 'class' => 'wp-list-table widefat fixed striped' ] ) );
 		echo $page;
 
 	}
@@ -28,38 +31,28 @@ class AdminTestConn {
 	public function testResults() {
 		$results = [];
 
-		$results[] = [ 'title' => 'Has hosts      ', 'result' => ( $ok = ! empty( Settings::getHosts() ) ) ? 'OK' : 'Missing', 'ok' => $ok ];
-		$results[] = [ 'title' => 'Has base_dn    ', 'result' => ( $ok = ! empty( Settings::getBasedn() ) ) ? 'OK' : 'Missing', 'ok' => $ok ];
-		$results[] = [ 'title' => 'Has username   ', 'result' => ( $ok = ! empty( Settings::getUsername() ) ) ? 'OK' : 'Missing', 'ok' => $ok ];
-		$results[] = [ 'title' => 'Has password   ', 'result' => ( $ok = ! empty( Settings::getPassword() ) ) ? 'OK' : 'Missing', 'ok' => $ok ];
-		$results[] = [ 'title' => 'Has port       ', 'result' => ( $ok = ! empty( Settings::getPort() ) ) ? 'OK' : 'Missing', 'ok' => $ok ];
-		$results[] = [ 'title' => 'Has map declared between ldap fields and wordpress fields        ', 'result' => ( $ok = ! empty( Settings::getMap() ) ) ? 'OK' : 'Missing', 'ok' => $ok ];
-		$results[] = [ 'title' => 'Has declared filter map      ', 'result' => ( $ok = ! empty( Settings::getMatch() ) ) ? 'OK' : 'Missing', 'ok' => $ok ];
-//		$results[] = [ 'title' => 'Records Founds', 'result' => ( $ok = ! empty( Settings::getMatch() ) ) ? 'OK' : 'Missing', 'ok' => $ok ];
+		$results[] = [ 'title' => 'Has Hosts      ', 'result' => ( $ok = ! empty( Settings::getHosts() ) ) ? 'OK' : 'Missing', 'ok' => $ok ];
+		$results[] = [ 'title' => 'Has Port       ', 'result' => ( $ok = ! empty( Settings::getPort() ) ) ? 'OK' : 'Missing', 'ok' => $ok ];
+		$results[] = [ 'title' => 'Has Protocol   ', 'result' => ( $ok = ! empty( Settings::getProtocol() ) ) ? 'OK' : 'Missing', 'ok' => $ok ];
+		$results[] = [ 'title' => 'Has WP User id ', 'result' => ( $ok = ! empty( Settings::getUserid() ) ) ? 'OK' : 'Missing', 'ok' => $ok ];
+		$results[] = [ 'title' => 'Has Password   ', 'result' => ( $ok = ! empty( Settings::getPassword() ) ) ? 'OK' : 'Missing', 'ok' => $ok ];
 
-
-		foreach ( Settings::getHosts() as $h => $host ) {
+		foreach ( preg_split( "/[\s,]+/", Settings::getHosts() ) as $h => $host ) {
+			$assert = '';
 			try {
 				$assert = "Connection to Host ($h) : $host";
 				if ( $host ) {
-					$ad        = new WpClusterCache();
-					$provider  = $ad->connect();
-					$results[] = [ 'title' => $assert, 'result' => 'OK', 'ok' => true ];
-				} else {
-					$assert    = "Connection to Host ($h)";
-					$results[] = [ 'title' => $assert, 'result' => 'Host empty', 'ok' => true ];
+					$client    = Client::client_by_host( $host );
+					$response  = $client->testConnection();
+					$results[] = [ 'title' => $assert, 'result' => $response, 'ok' => $response === true ];
 				}
 			} catch ( Exception $e ) {
 				$results[] = [ 'title' => $assert, 'result' => $e->getMessage(), 'ok' => false ];
-
-
 			}
+
 		}
 
 		return $results;
 
-
 	}
-
-
 }
