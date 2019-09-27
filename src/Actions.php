@@ -56,7 +56,10 @@ class Actions {
 	}
 
 	public function broadcast() {
-		if ( empty( $params = array_filter( func_get_args() ) ) ) {
+		$params = array_filter( func_get_args() );
+		if ( ! empty( $params ) ) {
+			$params = $params[0];
+		} else {
 			$params = $_GET;
 		}
 		$hosts   = (array) Settings::hosts();

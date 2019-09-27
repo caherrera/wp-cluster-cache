@@ -15,8 +15,9 @@ class Init {
 
 
 		add_action( 'wp_loaded', [ $this, 'checkUserExists' ] );
-	}
+		add_action( 'clean_post_cache', [ $this, 'notify_clean_post_cache' ] );
 
+	}
 
 	static public function factory() {
 		if ( self::$instance === null ) {
@@ -29,6 +30,13 @@ class Init {
 		return self::$instance;
 	}
 
+	public function notify_clean_post_cache( $post_id ) {
+		return call_user_func_array( [ Actions::factory(), 'broadcast' ], [ [ 'id' => $post_id ] ] );
+	}
+
+	public function notify_clean_cache( $post_id ) {
+		return call_user_func_array( [ Actions::factory(), 'broadcast' ], [ [ 'all' => 1 ] ] );
+	}
 
 	public function checkUserExists() {
 
