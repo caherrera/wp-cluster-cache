@@ -76,7 +76,9 @@ class Actions {
 				$results[ $host ] = [ 'status' => 500, 'body' => $e->getMessage() ];
 			}
 		}
-		wp_send_json_success( $results );
+		if (wp_doing_ajax()) {
+			wp_send_json_success( $results );
+		}
 	}
 
 	public function delete() {
