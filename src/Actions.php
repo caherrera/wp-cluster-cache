@@ -17,7 +17,7 @@ class Actions {
 	public function init() {
 
 		$this->addAjaxAction( 'status' );
-		$this->addAjaxAction( 'clean' );
+		$this->addAjaxAction( 'delete' );
 		$this->addAjaxAction( 'broadcast' );
 	}
 
@@ -76,7 +76,7 @@ class Actions {
 		wp_send_json_success( $results );
 	}
 
-	public function clean() {
+	public function delete() {
 		$params = $_GET;
 
 		if ( isset( $params['id'] ) && is_numeric( $params['id'] ) ) {
