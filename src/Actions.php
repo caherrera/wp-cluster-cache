@@ -68,7 +68,7 @@ class Actions {
 				$results[ $host ] = [ 'status' => $response->getStatusCode(), 'body' => $response->getBody()->getContents() ];
 
 			} catch ( ClientException $e ) {
-				$results[ $host ] = [ 'status' => $e->getResponse()->getStatusCode(), 'body' => $e->getResponse()->getBody()->getContents() ];
+				$results[ $host ] = [ 'status' => $e->getResponse()->getStatusCode(), 'body' => $e->getMessage() ];
 			} catch ( ConnectException $e ) {
 				$results[ $host ] = [ 'status' => 500, 'body' => $e->getMessage() ];
 			}
