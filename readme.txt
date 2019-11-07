@@ -1,7 +1,7 @@
 # WP Cluster Cache #
 * Contributors: caherrera
 * Tags: performance, caching, wp-cache, wp-super-cache, cache
-* Tested up to: 4.9.5
+* Tested up to: 4.9.8
 * Stable tag: 1.0.0
 * Requires at least: 3.0
 * Requires PHP: 5.2.4
